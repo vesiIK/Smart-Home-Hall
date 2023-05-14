@@ -1,0 +1,105 @@
+// C++ code
+//
+#include <Adafruit_NeoPixel.h>
+
+#define PIN_NEO_PIXEL 9 //инициализиране на pin
+#define NUM_PIXELS 4 //борой 
+
+int PIRS_1 = 0; //Сензор за движение в коридор
+int Gass = 0; //Димен детектор
+int Temp = 0; //Температурен сензор
+int PIRS_2 = 0; //Сензор за движение на входнота врата
+Adafruit_NeoPixel NeoPixel(NUM_PIXELS, PIN_NEO_PIXEL, NEO_GRB + NEO_KHZ800);
+
+
+void pixelRun1();
+void pixelRun2();
+
+void setup()
+{
+  Serial.begin(9600); // open the serial port at 9600 bps:
+  NeoPixel.begin();
+  NeoPixel.clear(); 
+  pinMode(11, INPUT);  //Сензор за движение в коридор
+  pinMode(10, INPUT); //Сензор за движение на входнота врата
+  pinMode(6, OUTPUT); //Вентилатор
+  pinMode(4, OUTPUT); //Аларма
+  pinMode(3, OUTPUT); //Лампи
+  pinMode(A0, INPUT); //Димен детектор
+  pinMode(A1, INPUT); //Температурен сензор
+  
+}
+
+void loop()
+{ 
+  
+  //Автоматично включване на лампи
+  PIRS_1 = digitalRead(11);
+  Serial.println(PIRS_1);
+  if(PIRS_1 == HIGH)
+  {
+     digitalWrite(3, HIGH); //Лампите се включват
+  }
+  else
+  {
+    digitalWrite(3, LOW); //Лапите са изключени
+  }
+  
+  //Димен детектор
+  Gass = analogRead(A0);
+  Serial.println(Gass);
+  if(Gass >= 220)
+  {
+    digitalWrite(4, HIGH); //Алармата се пуска
+  }
+  else
+  {
+    digitalWrite(4, LOW);//Алармата е спряна
+  }
+  
+  //Температура
+  Temp = (-40 + 0.488155 * (analogRead(A1) - 20));
+  Serial.println(Temp);
+  if(Temp >= 27)
+  {
+    digitalWrite(6, HIGH); //Вентилатора се пуска
+  }
+  else
+  {
+    digitalWrite(6, LOW);//Вентилатоеа е спрян
+  }
+  
+  //Автоматично пускане на LED лампите
+  PIRS_2 = digitalRead(10);
+  Serial.println(PIRS_2);
+  if(PIRS_2 == HIGH)
+  {
+     pixelRun2(); //Пуска се
+     
+  } 
+}
+
+void pixelRun1(){
+   NeoPixel.clear();
+   for(int i = 0; i < NUM_PIXELS; i++) {
+  	NeoPixel.setPixelColor(i, NeoPixel.Color(i*20, 150, i*30));
+    NeoPixel.show();
+ 
+    delay(300); 
+    NeoPixel.clear();
+    NeoPixel.show(); 
+   }
+}
+
+void pixelRun2(){
+   NeoPixel.clear();
+   for(int i = 0; i < NUM_PIXELS; i++) {
+  	NeoPixel.setPixelColor(i, NeoPixel.Color(0, 255, 255));
+   }
+   NeoPixel.show();
+  
+   delay(5000); 
+   NeoPixel.clear();
+   NeoPixel.show();
+   
+}
